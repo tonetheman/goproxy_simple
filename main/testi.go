@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/hex"
+	"flag"
 	"fmt"
 	"net"
 	"strconv"
-
-	"github.com/tonetheman/go-socks5"
 )
 
 var remoteHost = "localhost"
@@ -89,7 +88,7 @@ func tonySimpleProxy() {
 	}
 }
 
-func main() {
+func socks5() {
 	conf := &socks5.Config{}
 	server, err := socks5.New(conf)
 	if err != nil {
@@ -98,4 +97,12 @@ func main() {
 	if err := server.ListenAndServe("tcp", "127.0.0.1:8000"); err != nil {
 		panic(err)
 	}
+}
+
+func main() {
+	listenAddress := flag.String("listenip", "localhost", "listen on this ip address")
+	listenPort := flag.Int("listenport", 4444, "local port to listen on for connection")
+	destAddress := flag.String("destaddress", "localhost", "dest address for tcp traffic")
+	destPort := flag.Int("destport", 5555, "dest port for tcp traffic")
+
 }
