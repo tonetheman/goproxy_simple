@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+
+	"github.com/tonetheman/go-socks5"
 )
 
 var remoteHost = "localhost"
@@ -88,7 +90,7 @@ func tonySimpleProxy() {
 	}
 }
 
-func socks5() {
+func socksstuff() {
 	conf := &socks5.Config{}
 	server, err := socks5.New(conf)
 	if err != nil {
@@ -105,4 +107,5 @@ func main() {
 	destAddress := flag.String("destaddress", "localhost", "dest address for tcp traffic")
 	destPort := flag.Int("destport", 5555, "dest port for tcp traffic")
 
+	socksstuff()
 }
