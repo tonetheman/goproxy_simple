@@ -62,11 +62,11 @@ func proxy(conn net.Conn) {
 
 }
 
-func tonySimpleProxy() {
+func tonySimpleProxy(listenHost *string, listenPort *int) {
 
-	listenHost := "localhost"
-	listenPort := 8000
-	listenAddress := listenHost + ":" + strconv.Itoa(listenPort)
+	//listenHost := "localhost"
+	//listenPort := 8000
+	listenAddress := *listenHost + ":" + strconv.Itoa(*listenPort)
 	addr, err := net.ResolveTCPAddr("tcp", listenAddress)
 	if err != nil {
 		fmt.Println("err resolve listen", err)
@@ -90,13 +90,13 @@ func tonySimpleProxy() {
 	}
 }
 
-func socksstuff() {
+func socksstuff(listenAddress *string, listenPort *int) {
 	conf := &socks5.Config{}
 	server, err := socks5.New(conf)
 	if err != nil {
 		panic(err)
 	}
-	if err := server.ListenAndServe("tcp", "127.0.0.1:8000"); err != nil {
+	if err := server.ListenAndServe("tcp", *listenAddress+":"+strconv.Itoa(*listenPort)); err != nil {
 		panic(err)
 	}
 }
@@ -106,6 +106,12 @@ func main() {
 	listenPort := flag.Int("listenport", 4444, "local port to listen on for connection")
 	destAddress := flag.String("destaddress", "localhost", "dest address for tcp traffic")
 	destPort := flag.Int("destport", 5555, "dest port for tcp traffic")
+	useSocks5 := flag.Bool("socks5", false, "use socks5 for this proxy")
 
-	socksstuff()
+	if *useSocks5 {
+		socksstuff(listenAddress, listenPort)
+		return
+	}
+
+	tonySimpleProxy(listenAddress, listenPort)
 }
