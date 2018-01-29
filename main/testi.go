@@ -10,11 +10,19 @@ import (
 	"github.com/tonetheman/go-socks5"
 )
 
-var remoteHost = "localhost"
-var remotePort = 9000
-var remoteAddress = remoteHost + ":" + strconv.Itoa(remotePort)
+//var remoteHost = "localhost"
+//var remotePort = 9000
+//var remoteAddress = remoteHost + ":" + strconv.Itoa(remotePort)
 
-func proxy(conn net.Conn) {
+type proxyinfo struct {
+	listenhost string
+	listenport int
+	desthost   string
+	destport   int
+}
+
+func proxy(conn net.Conn, p proxyinfo) {
+	remoteAddress := p.desthost + ":" + strconv.Itoa(p.destport)
 	rAddr, err := net.ResolveTCPAddr("tcp", remoteAddress)
 	if err != nil {
 		fmt.Println("err resolve remote", err)
@@ -62,11 +70,11 @@ func proxy(conn net.Conn) {
 
 }
 
-func tonySimpleProxy(listenHost *string, listenPort *int) {
+func tonySimpleProxy(p proxyinfo) {
 
 	//listenHost := "localhost"
 	//listenPort := 8000
-	listenAddress := *listenHost + ":" + strconv.Itoa(*listenPort)
+	listenAddress := p.listenhost + ":" + strconv.Itoa(p.listenport)
 	addr, err := net.ResolveTCPAddr("tcp", listenAddress)
 	if err != nil {
 		fmt.Println("err resolve listen", err)
@@ -86,7 +94,7 @@ func tonySimpleProxy(listenHost *string, listenPort *int) {
 			panic(err)
 		}
 
-		go proxy(conn)
+		go proxy(conn, p)
 	}
 }
 
@@ -108,10 +116,19 @@ func main() {
 	destPort := flag.Int("destport", 5555, "dest port for tcp traffic")
 	useSocks5 := flag.Bool("socks5", false, "use socks5 for this proxy")
 
+	fmt.Println("listen info:", *listenAddress, *listenPort)
+	fmt.Println("dest info:", *destAddress, *destPort)
+	fmt.Println("use socks?", *useSocks5)
+
 	if *useSocks5 {
+		fmt.Println("socks5 mode")
 		socksstuff(listenAddress, listenPort)
 		return
 	}
 
-	tonySimpleProxy(listenAddress, listenPort)
+	p := proxyinfo{*listenAddress, *listenPort,
+		*destAddress, *destPort}
+
+	fmt.Println("running in simple proxy mode")
+	tonySimpleProxy(p)
 }
